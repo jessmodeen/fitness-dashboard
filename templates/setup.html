@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Setup — Fitness Dashboard{% endblock %}
+{% block body %}
+<div class="setup-page">
+  <header class="setup-header">
+    <div class="setup-logo">🏋️</div>
+    <h1>Morning Fitness Dashboard</h1>
+    <p class="setup-subtitle">Follow the steps below to connect your accounts</p>
+  </header>
+
+  {% if missing_env %}
+  <div class="setup-alert">
+    <strong>⚠ First:</strong> Your <code>.env</code> file is missing these values —
+    open it in a text editor and fill them in before connecting:
+    <ul>
+      {% for key in missing_env %}
+      <li><code>{{ key }}</code></li>
+      {% endfor %}
+    </ul>
+    <p>See the <strong>Step 1</strong> instructions below for where to find each credential.</p>
+  </div>
+  {% endif %}
+
+  <!-- ─── Step 1 ─────────────────────────────────────────────────── -->
+  <div class="setup-step {% if not missing_env %}step-done{% endif %}">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <h2>Configure your API credentials</h2>
+      <p>Open the file <code>.env</code> (in your <code>fitness-dashboard</code> folder) in any text editor and fill in the following:</p>
+
+      <div class="credential-group">
+        <h3>🟣 Whoop API</h3>
+        <ol>
+          <li>Go to <strong>developer.whoop.com</strong> and sign in with your Whoop account</li>
+          <li>Click <strong>Create Application</strong></li>
+          <li>Set the <strong>Redirect URI</strong> to exactly: <code>http://localhost:5000/auth/whoop/callback</code></li>
+          <li>Copy your <strong>Client ID</strong> → paste as <code>WHOOP_CLIENT_ID</code></li>
+          <li>Copy your <strong>Client Secret</strong> → paste as <code>WHOOP_CLIENT_SECRET</code></li>
+        </ol>
+      </div>
+
+      <div class="credential-group">
+        <h3>🟠 Strava API</h3>
+        <ol>
+          <li>Go to <strong>strava.com/settings/api</strong> and sign in</li>
+          <li>Fill in any name for your app; set <strong>Authorization Callback Domain</strong> to <code>localhost</code></li>
+          <li>Copy your <strong>Client ID</strong> → paste as <code>STRAVA_CLIENT_ID</code></li>
+          <li>Copy your <strong>Client Secret</strong> → paste as <code>STRAVA_CLIENT_SECRET</code></li>
+        </ol>
+      </div>
+
+      <div class="credential-group">
+        <h3>🤖 Anthropic (Claude AI)</h3>
+        <ol>
+          <li>Go to <strong>console.anthropic.com</strong> and sign in</li>
+          <li>Click <strong>API Keys</strong> → <strong>Create Key</strong></li>
+          <li>Copy the key → paste as <code>ANTHROPIC_API_KEY</code></li>
+        </ol>
+      </div>
+
+      <div class="credential-group">
+        <h3>🔑 Flask Secret Key</h3>
+        <ol>
+          <li>In your terminal, run: <code>python3 -c "import secrets; print(secrets.token_hex(32))"</code></li>
+          <li>Copy the output → paste as <code>FLASK_SECRET_KEY</code></li>
+        </ol>
+      </div>
+
+      <p class="step-note">After editing <code>.env</code>, <strong>restart the dashboard</strong> (stop with Ctrl+C and run <code>python3 app.py</code> again) so it reads the new values.</p>
+
+      {% if not missing_env %}
+      <div class="step-check">✓ All credentials detected in your .env</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ─── Step 2 ─────────────────────────────────────────────────── -->
+  <div class="setup-step {% if whoop_connected %}step-done{% endif %}">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <h2>Connect your Whoop account</h2>
+      {% if whoop_connected %}
+        <div class="step-check">✓ Whoop is connected</div>
+        <a href="{{ url_for('disconnect', service='whoop') }}" class="btn btn-danger btn-sm">Disconnect Whoop</a>
+      {% else %}
+        <p>Click the button below. You'll be taken to Whoop's website to authorize access, then redirected back here automatically.</p>
+        <a href="{{ url_for('auth_whoop') }}" class="btn btn-primary">Connect Whoop →</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ─── Step 3 ─────────────────────────────────────────────────── -->
+  <div class="setup-step {% if strava_connected %}step-done{% endif %}">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <h2>Connect your Strava account</h2>
+      {% if strava_connected %}
+        <div class="step-check">✓ Strava is connected</div>
+        <a href="{{ url_for('disconnect', service='strava') }}" class="btn btn-danger btn-sm">Disconnect Strava</a>
+      {% else %}
+        <p>Click the button below. You'll be taken to Strava's website to authorize access, then redirected back here automatically.</p>
+        <a href="{{ url_for('auth_strava') }}" class="btn btn-primary">Connect Strava →</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ─── Step 4 ─────────────────────────────────────────────────── -->
+  <div class="setup-step {% if whoop_connected or strava_connected %}step-ready{% endif %}">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <h2>Open your dashboard</h2>
+      {% if whoop_connected or strava_connected %}
+        <p>You're connected! Your dashboard is ready.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-success">Open Dashboard →</a>
+      {% else %}
+        <p>Connect at least one account above, then come back here.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Error — Fitness Dashboard{% endblock %}
+{% block body %}
+<div class="error-page">
+  <div class="error-card">
+    <div class="error-icon">⚠</div>
+    <h1>Something went wrong</h1>
+    <p>{{ message }}</p>
+    <div class="error-actions">
+      <a href="{{ url_for('setup') }}" class="btn btn-primary">Go to Setup</a>
+      <a href="{{ url_for('index') }}" class="btn btn-ghost">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

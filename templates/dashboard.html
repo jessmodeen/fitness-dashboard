@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% block title %}Morning Dashboard — {{ now.strftime('%a %b %-d') }}{% endblock %}
+
+{% block body %}
+
+{# ─── Derive recovery state ──────────────────────────────────────────────── #}
+{% set recovery = data.get('recovery') %}
+{% set recovery_scored = recovery and recovery.get('score_state') == 'SCORED' %}
+{% set recovery_score = recovery.score.recovery_score if recovery_scored else None %}
+{% if recovery_score is not none %}
+  {% if recovery_score >= 67 %}
+    {% set score_class = 'green' %}
+    {% set score_label = 'Green — Full Training Day' %}
+  {% elif recovery_score >= 34 %}
+    {% set score_class = 'yellow' %}
+    {% set score_label = 'Yellow — Take It Steady' %}
+  {% else %}
+    {% set score_class = 'red' %}
+    {% set score_label = 'Red — Rest & Recover' %}
+  {% endif %}
+{% else %}
+  {% set score_class = 'unknown' %}
+  {% set score_label = 'Pending / Not Yet Scored' %}
+{% endif %}
+
+{# ─── Sleep shorthand ────────────────────────────────────────────────────── #}
+{% set sleep = data.get('sleep') %}
+{% set sleep_scored = sleep and sleep.get('score_state') == 'SCORED' %}
+{% set sleep_score = sleep.score if sleep_scored else None %}
+{% set stage = sleep_score.stage_summary if sleep_score else None %}
+
+{# ─── Cycle shorthand ────────────────────────────────────────────────────── #}
+{% set cycle = data.get('cycle') %}
+{% set cycle_scored = cycle and cycle.get('score_state') == 'SCORED' %}
+{% set cycle_score = cycle.score if cycle_scored else None %}
+
+{# ─── Workouts ───────────────────────────────────────────────────────────── #}
+{% set workouts = data.get('workouts', []) %}
+
+{# ─── Strava ─────────────────────────────────────────────────────────────── #}
+{% set strava = data.get('strava_activities', []) %}
+
+<div class="dash-layout">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="dash-header">
+    <div class="dash-header-left">
+      <span class="dash-date">{{ now.strftime('%A, %B %-d, %Y') }}</span>
+      <span class="dash-phase">Phase 1 — Indoor / Sub-Threshold</span>
+    </div>
+    <div class="dash-header-right">
+      <a href="{{ url_for('index') }}" class="btn btn-ghost btn-sm">↻ Refresh</a>
+      <a href="{{ url_for('setup') }}" class="btn btn-ghost btn-sm">⚙ Setup</a>
+    </div>
+  </header>
+
+  <!-- ── Error banner ────────────────────────────────────────────────────── -->
+  {% if errors %}
+  <div class="error-banner">
+    {% for service, msg in errors.items() %}
+    <p><strong>{{ service | title }} error:</strong> {{ msg }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Top row: Recovery + Sleep ───────────────────────────────────────── -->
+  <div class="dash-row dash-row-top">
+
+    <!-- Recovery card -->
+    <div class="card card-recovery {{ score_class }}">
+      <div class="card-label">RECOVERY</div>
+      {% if recovery_score is not none %}
+        <div class="recovery-score {{ score_class }}">{{ recovery_score }}%</div>
+        <div class="recovery-label {{ score_class }}">{{ score_label }}</div>
+        <div class="recovery-metrics">
+          <div class="metric">
+            <span class="metric-val">{{ recovery.score.hrv_rmssd_milli | round1 }}</span>
+            <span class="metric-unit">ms HRV</span>
+          </div>
+          <div class="metric">
+            <span class="metric-val">{{ recovery.score.resting_heart_rate }}</span>
+            <span class="metric-unit">bpm RHR</span>
+          </div>
+          {% if recovery.score.spo2_percentage %}
+          <div class="metric">
+            <span class="metric-val">{{ recovery.score.spo2_percentage | round1 }}</span>
+            <span class="metric-unit">% SpO2</span>
+          </div>
+          {% endif %}
+        </div>
+      {% elif not whoop_connected %}
+        <div class="card-empty">Whoop not connected.<br><a href="{{ url_for('setup') }}">Connect →</a></div>
+      {% else %}
+        <div class="card-empty">Recovery not yet scored.<br>Check back soon.</div>
+      {% endif %}
+    </div>
+
+    <!-- Sleep card -->
+    <div class="card card-sleep">
+      <div class="card-label">LAST NIGHT'S SLEEP</div>
+      {% if sleep_score %}
+        <div class="sleep-perf">
+          <span class="sleep-perf-val">{{ sleep_score.sleep_performance_percentage }}</span>
+          <span class="sleep-perf-unit">%</span>
+        </div>
+        <div class="sleep-metrics">
+          {% if stage %}
+          <div class="sleep-row">
+            <span class="sleep-key">Total in bed</span>
+            <span class="sleep-val">{{ stage.total_in_bed_time_milli | ms_to_hm }}</span>
+          </div>
+          <div class="sleep-row">
+            <span class="sleep-key">REM sleep</span>
+            <span class="sleep-val">{{ stage.total_rem_sleep_time_milli | ms_to_hm }}</span>
+          </div>
+          <div class="sleep-row">
+            <span class="sleep-key">Deep sleep</span>
+            <span class="sleep-val">{{ stage.total_slow_wave_sleep_time_milli | ms_to_hm }}</span>
+          </div>
+          <div class="sleep-row">
+            <span class="sleep-key">Disturbances</span>
+            <span class="sleep-val">{{ stage.disturbance_count }}</span>
+          </div>
+          {% endif %}
+          <div class="sleep-row">
+            <span class="sleep-key">Consistency</span>
+            <span class="sleep-val">{{ sleep_score.sleep_consistency_percentage }}%</span>
+          </div>
+        </div>
+      {% elif not whoop_connected %}
+        <div class="card-empty">Whoop not connected.<br><a href="{{ url_for('setup') }}">Connect →</a></div>
+      {% else %}
+        <div class="card-empty">Sleep not yet scored.</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- ── Middle row: Strain + Workouts + Strava ──────────────────────────── -->
+  <div class="dash-row dash-row-mid">
+
+    <!-- Strain card -->
+    <div class="card card-strain">
+      <div class="card-label">YESTERDAY'S STRAIN</div>
+      {% if cycle_score %}
+        <div class="strain-score">{{ cycle_score.strain | round1 }}<span class="strain-denom">/21</span></div>
+        <div class="strain-metrics">
+          <div class="metric">
+            <span class="metric-val">{{ cycle_score.average_heart_rate }}</span>
+            <span class="metric-unit">avg bpm</span>
+          </div>
+          <div class="metric">
+            <span class="metric-val">{{ cycle_score.max_heart_rate }}</span>
+            <span class="metric-unit">max bpm</span>
+          </div>
+          <div class="metric">
+            <span class="metric-val">{{ (cycle_score.kilojoule * 0.239) | int }}</span>
+            <span class="metric-unit">kcal</span>
+          </div>
+        </div>
+      {% elif not whoop_connected %}
+        <div class="card-empty">—</div>
+      {% else %}
+        <div class="card-empty">Strain data pending.</div>
+      {% endif %}
+    </div>
+
+    <!-- Recent workouts card -->
+    <div class="card card-workouts">
+      <div class="card-label">RECENT WHOOP WORKOUTS</div>
+      {% if workouts %}
+        <div class="workout-list">
+          {% for w in workouts[:4] %}
+            {% set ws = w.score if w.score_state == 'SCORED' else None %}
+            <div class="workout-item">
+              <span class="workout-name">{{ w.sport_name }}</span>
+              {% if ws %}
+              <span class="workout-detail">
+                Strain {{ ws.strain | round1 }}
+                &nbsp;·&nbsp; {{ ws.average_heart_rate }} bpm avg
+              </span>
+              {% else %}
+              <span class="workout-detail dim">Unscored</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% elif not whoop_connected %}
+        <div class="card-empty">Whoop not connected.</div>
+      {% else %}
+        <div class="card-empty">No recent workouts.</div>
+      {% endif %}
+    </div>
+
+    <!-- Strava card -->
+    <div class="card card-strava">
+      <div class="card-label">RECENT STRAVA ACTIVITIES</div>
+      {% if strava %}
+        <div class="activity-list">
+          {% for act in strava[:5] %}
+          <div class="activity-item">
+            <div class="activity-name">{{ act.name }}</div>
+            <div class="activity-detail">
+              <span>{{ act.start_date_local[:10] }}</span>
+              <span>{{ (act.distance / 1000) | round(1) }} km</span>
+              <span>{{ act.moving_time // 60 }} min</span>
+              {% if act.average_watts %}
+              <span>{{ act.average_watts | int }}W</span>
+              {% endif %}
+              {% if act.total_elevation_gain %}
+              <span>↑{{ act.total_elevation_gain | int }}m</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% elif not strava_connected %}
+        <div class="card-empty">Strava not connected.<br><a href="{{ url_for('setup') }}">Connect →</a></div>
+      {% else %}
+        <div class="card-empty">No recent activities found.</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- ── Training Recommendation ─────────────────────────────────────────── -->
+  <div class="card card-recommendation">
+    <div class="rec-header">
+      <div class="card-label">TODAY'S TRAINING PLAN (powered by Claude AI)</div>
+      <button id="rec-refresh-btn" class="btn btn-ghost btn-sm" onclick="loadRecommendation()">↻ Regenerate</button>
+    </div>
+
+    <div id="rec-loading" class="rec-loading">
+      <div class="spinner"></div>
+      <p>Generating your personalized plan…</p>
+    </div>
+
+    <div id="rec-error" class="rec-error" style="display:none"></div>
+
+    <div id="rec-content" class="rec-content" style="display:none"></div>
+  </div>
+
+</div><!-- /.dash-layout -->
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
