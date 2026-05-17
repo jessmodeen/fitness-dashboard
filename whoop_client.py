@@ -88,9 +88,16 @@ class WhoopClient:
         return resp.json()
 
     def get_latest_recovery(self):
-        data = self._get("/recovery", params={"limit": 1})
-        records = data.get("records", [])
-        return records[0] if records else None
+        # Recovery must be fetched by cycle ID — there is no list endpoint
+        cycles = self._get("/cycle", params={"limit": 1})
+        records = cycles.get("records", [])
+        if not records:
+            return None
+        cycle_id = records[0]["id"]
+        try:
+            return self._get(f"/recovery/{cycle_id}")
+        except Exception:
+            return None
 
     def get_latest_sleep(self):
         data = self._get("/sleep", params={"limit": 1})
