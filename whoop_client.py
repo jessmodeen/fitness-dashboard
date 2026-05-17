@@ -100,7 +100,7 @@ class WhoopClient:
             return None
 
     def get_latest_sleep(self):
-        data = self._get("/sleep", params={"limit": 1})
+        data = self._get("/activity/sleep", params={"limit": 1})
         records = data.get("records", [])
         # Skip naps
         for record in records:
@@ -114,7 +114,7 @@ class WhoopClient:
         return records[0] if records else None
 
     def get_recent_workouts(self, limit=5):
-        data = self._get("/workout", params={"limit": limit})
+        data = self._get("/activity/workout", params={"limit": limit})
         workouts = data.get("records", [])
         for w in workouts:
             w["sport_name"] = SPORT_NAMES.get(w.get("sport_id", -1), "Workout")
