@@ -199,6 +199,9 @@ def generate_recommendation(data):
     whoop_summary = _format_whoop_data(data)
     strava_summary = _format_strava_data(data)
 
+notes = data.get("user_notes", "").strip()
+    notes_section = f"\nMY PERSONAL NOTES & FEEDBACK:\n{notes}\n" if notes else ""
+
     user_message = f"""Today is {today}.
 
 Here is my current biometric and training data:
@@ -206,7 +209,7 @@ Here is my current biometric and training data:
 {whoop_summary}
 
 {strava_summary}
-
+{notes_section}
 Please generate my complete daily training plan for today."""
 
     response = client.messages.create(
