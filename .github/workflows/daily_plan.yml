@@ -25,4 +25,5 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GH_PAT: ${{ secrets.GH_PAT }}
           GH_REPO: ${{ github.repository }}
+          USER_NOTES: ${{ secrets.USER_NOTES }}
         run: python send_daily_plan.py
