@@ -304,15 +304,10 @@ def generate_pdf(plan_text, date_str, whoop_data):
             pdf.set_text_color(60, 60, 60)
             pdf.cell(0, 7, line[4:].strip(), ln=True)
             pdf.set_text_color(30, 30, 30)
-        elif re.match(r'^[-*] ', line):
+                elif re.match(r'^[-*] ', line):
             item = re.sub(r'\*\*(.+?)\*\*', r'\1', line[2:]).strip()
             pdf.set_font("Helvetica", "", 10)
-            pdf.cell(5, 6, chr(149))
-            pdf.multi_cell(0, 6, item)
-        elif line.strip():
-            text = re.sub(r'\*\*(.+?)\*\*', r'\1', line).strip()
-            pdf.set_font("Helvetica", "", 10)
-            pdf.multi_cell(0, 6, text)
+            pdf.multi_cell(0, 6, f"  - {item}")
         else:
             pdf.ln(3)
 
