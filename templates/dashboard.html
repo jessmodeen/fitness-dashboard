@@ -240,6 +240,17 @@
     <div id="rec-content" class="rec-content" style="display:none"></div>
   </div>
 
+  <!-- ── Personal Notes ──────────────────────────────────────────────────── -->
+  <div class="card card-notes">
+    <div class="card-label">MY NOTES &amp; FEEDBACK</div>
+    <p class="notes-hint">Anything here is included in tomorrow's plan — weights that felt too heavy/light, exercises to swap, preferences, etc.</p>
+    <textarea id="notes-textarea" class="notes-textarea" placeholder="e.g. Use 12lb not 15lb for rows. Lateral raises at 8lb. Prefer Matt Wilpers for Power Zone rides."></textarea>
+    <div class="notes-footer">
+      <span id="notes-status" class="notes-status"></span>
+      <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+
 </div><!-- /.dash-layout -->
 
 {% endblock %}
