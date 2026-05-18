@@ -31,5 +31,31 @@ function loadRecommendation() {
     });
 }
 
+function saveNotes() {
+  const text = document.getElementById('notes-textarea').value;
+  const status = document.getElementById('notes-status');
+  fetch('/api/notes', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({notes: text})
+  })
+  .then(r => r.json())
+  .then(() => {
+    status.textContent = 'Saved!';
+    setTimeout(() => status.textContent = '', 3000);
+  });
+}
+
+function loadNotes() {
+  fetch('/api/notes')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('notes-textarea').value = data.notes || '';
+    });
+}
+
 // Auto-load on page open
-document.addEventListener('DOMContentLoaded', loadRecommendation);
+document.addEventListener('DOMContentLoaded', () => {
+  loadRecommendation();
+  loadNotes();
+});
