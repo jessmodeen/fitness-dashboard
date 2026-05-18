@@ -253,6 +253,10 @@ def api_recommendation():
         except Exception as e:
             data["strava_error"] = str(e)
 
+    notes_data = token_store.get("user_notes")
+    if notes_data:
+        data["user_notes"] = notes_data.get("text", "")
+    
     try:
         recommendation = generate_recommendation(data)
         return jsonify({"success": True, "recommendation": recommendation})
@@ -297,7 +301,16 @@ def debug_whoop():
         probe(f"v2/cycle/{cid}/recovery", f"{base_v2}/cycle/{cid}/recovery")
 
     return jsonify(results)
-
+    
+@app.route("/api/notes", methods=["GET", "POST"])
+def api_notes():
+    if request.method == "POST":
+        notes = request.json.get("notes", "").strip()
+        token_store.set("user_notes", {"text": notes})
+        return jsonify({"success": True})
+    notes_data = token_store.get("user_notes")
+    return jsonify({"notes": notes_data.get("text", "") if notes_data else ""})
+    
 
 if __name__ == "__main__":
     port = int(os.environ.get("FLASK_PORT", 5000))
