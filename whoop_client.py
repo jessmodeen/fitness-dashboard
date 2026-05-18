@@ -2,46 +2,15 @@ import os
 import requests
 
 WHOOP_API_BASE = "https://api.prod.whoop.com/developer/v1"
+WHOOP_API_BASE_V2 = "https://api.prod.whoop.com/developer/v2"
 WHOOP_TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token"
 
 SPORT_NAMES = {
-    -1: "Activity",
-    0: "Running",
-    1: "Cycling",
-    16: "Baseball",
-    17: "Basketball",
-    18: "Rowing",
-    21: "Football",
-    27: "Rugby",
-    29: "Skiing",
-    30: "Soccer",
-    33: "Swimming",
-    34: "Tennis",
-    38: "Wrestling",
-    39: "Boxing",
-    43: "Pilates",
-    44: "Yoga",
-    45: "Weightlifting",
-    52: "Hiking",
-    56: "Martial Arts",
-    57: "Mountain Biking",
-    61: "Powerlifting",
-    62: "Rock Climbing",
-    64: "Triathlon",
-    65: "Walking",
-    66: "Surfing",
-    70: "Elliptical",
-    71: "Stairmaster",
-    73: "Meditation",
-    79: "Indoor Cycling",
-    83: "Spinning",
-    84: "Circuit Training",
-    86: "HIIT",
-    88: "Cross Training",
-    89: "Cardiovascular",
-    96: "Canoeing",
-    108: "Snowboarding",
-    126: "Strength Training",
+    -1: "Activity", 0: "Running", 1: "Cycling", 18: "Rowing",
+    43: "Pilates", 44: "Yoga", 45: "Weightlifting", 65: "Walking",
+    70: "Elliptical", 71: "Stairmaster", 79: "Indoor Cycling",
+    83: "Spinning", 84: "Circuit Training", 86: "HIIT",
+    88: "Cross Training", 89: "Cardiovascular", 126: "Strength Training",
 }
 
 
@@ -49,11 +18,6 @@ class WhoopClient:
     def __init__(self, tokens, token_store):
         self.tokens = tokens
         self.token_store = token_store
-
-    def _refresh_if_needed(self):
-        # Whoop tokens include an expires_in but not always expires_at.
-        # We always attempt a refresh on 401.
-        pass
 
     def _refresh_token(self):
         resp = requests.post(
@@ -70,44 +34,73 @@ class WhoopClient:
         self.tokens = resp.json()
         self.token_store.set("whoop", self.tokens)
 
-    def _get(self, endpoint, params=None):
+    def _request(self, base_url, endpoint, params=None):
         def _do_request():
             headers = {"Authorization": f"Bearer {self.tokens['access_token']}"}
             return requests.get(
-                f"{WHOOP_API_BASE}{endpoint}",
+                f"{base_url}{endpoint}",
                 headers=headers,
                 params=params,
                 timeout=15,
             )
-
         resp = _do_request()
         if resp.status_code == 401:
             self._refresh_token()
             resp = _do_request()
+        if resp.status_code == 404:
+            return None
         resp.raise_for_status()
         return resp.json()
 
+    def _get(self, endpoint, params=None):
+        return self._request(WHOOP_API_BASE, endpoint, params)
+
+    def _get_v2(self, endpoint, params=None):
+        return self._request(WHOOP_API_BASE_V2, endpoint, params)
+
     def get_latest_recovery(self):
-        data = self._get("/recovery", params={"limit": 1})
-        records = data.get("records", [])
-        return records[0] if records else None
+        cycles = self._get("/cycle", params={"limit": 5})
+        if not cycles:
+            return None
+        records = cycles.get("records", [])
+        for record in records:
+            cycle_id = record["id"]
+            recovery = self._get_v2(f"/cycle/{cycle_id}/recovery")
+            if recovery and recovery.get("score_state") == "SCORED":
+                return recovery
+        if records:
+            return self._get_v2(f"/cycle/{records[0]['id']}/recovery")
+        return None    
 
     def get_latest_sleep(self):
-        data = self._get("/sleep", params={"limit": 1})
-        records = data.get("records", [])
-        # Skip naps
-        for record in records:
-            if not record.get("nap"):
-                return record
-        return records[0] if records else None
+        # v2 confirmed working; fall back to v1 if needed
+        for base_fn in [self._get_v2, self._get]:
+            data = base_fn("/activity/sleep", params={"limit": 1})
+            if data is not None:
+                records = data.get("records", [])
+                for record in records:
+                    if not record.get("nap"):
+                        return record
+                return records[0] if records else None
+        return None
 
     def get_latest_cycle(self):
-        data = self._get("/cycle", params={"limit": 1})
+        # Fetch 2 cycles: index 0 is the current active day, index 1 is yesterday (completed)
+        data = self._get("/cycle", params={"limit": 2})
+        if not data:
+            return None
         records = data.get("records", [])
-        return records[0] if records else None
+        if not records:
+            return None
+        # Use yesterday's completed cycle if available; fall back to current
+        if len(records) > 1 and records[1].get("score_state") == "SCORED":
+            return records[1]
+        return records[0]
 
     def get_recent_workouts(self, limit=5):
-        data = self._get("/workout", params={"limit": limit})
+        data = self._get("/activity/workout", params={"limit": limit})
+        if not data:
+            return []
         workouts = data.get("records", [])
         for w in workouts:
             w["sport_name"] = SPORT_NAMES.get(w.get("sport_id", -1), "Workout")

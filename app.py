@@ -259,6 +259,45 @@ def api_recommendation():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route("/debug/whoop")
+def debug_whoop():
+    import json
+    whoop_tokens = token_store.get("whoop")
+    if not whoop_tokens:
+        return jsonify({"error": "not connected"})
+
+    results = {}
+    base_v1 = "https://api.prod.whoop.com/developer/v1"
+    base_v2 = "https://api.prod.whoop.com/developer/v2"
+    headers = {"Authorization": f"Bearer {whoop_tokens['access_token']}"}
+
+    def probe(label, url, params=None):
+        try:
+            r = requests.get(url, headers=headers, params=params, timeout=15)
+            try:
+                body = json.dumps(r.json())[:300]
+            except Exception:
+                body = r.text[:300]
+            results[label] = {"status": r.status_code, "body": body}
+        except Exception as e:
+            results[label] = {"error": str(e)}
+
+    # Get real cycle IDs from v1
+    probe("v1/cycle list", f"{base_v1}/cycle", {"limit": 3})
+
+    # Try recovery list endpoints
+    probe("v1/recovery list", f"{base_v1}/recovery", {"limit": 3})
+    probe("v2/recovery list", f"{base_v2}/recovery", {"limit": 3})
+
+    # Try the cycle IDs we already know about
+    for cid in [1504133220]:
+        probe(f"v1/recovery/{cid}", f"{base_v1}/recovery/{cid}")
+        probe(f"v2/recovery/{cid}", f"{base_v2}/recovery/{cid}")
+        probe(f"v1/cycle/{cid}/recovery", f"{base_v1}/cycle/{cid}/recovery")
+        probe(f"v2/cycle/{cid}/recovery", f"{base_v2}/cycle/{cid}/recovery")
+
+    return jsonify(results)
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("FLASK_PORT", 5000))

@@ -28,7 +28,6 @@ EQUIPMENT AVAILABLE
 • Peloton Rower
 • BOSU ball
 • Dumbbells: 3, 5, 8, 10, 15, 20 lb
-• Resistance bands: various strengths (light / medium / heavy)
 • Yoga mat
 
 ═══════════════════════════════════════════════════════
@@ -48,8 +47,9 @@ Power Zone, HIIT & Hills. Never the same type two days in a row.
   - Stability: planks (front/side), dead bugs, bird dogs, Pallof press
   - Traditional: crunches, bicycle crunches, leg raises, flutter kicks
   - Pilates-style: hollow holds, scissors, roll-ups, single-leg stretch, toe taps
-• Strength: upper body focus — rows, lat pulldowns with bands, chest press, shoulder work, \
-bicep curls, tricep extensions. Occasionally add lower body (glutes, hamstrings) on green days.
+• Strength: upper body focus — dumbbell rows, chest press, shoulder press, lateral raises, \
+bicep curls, tricep extensions. Occasionally add lower body (glutes, hamstrings) on green days. \
+Only use dumbbells — no resistance bands.
 
 ═══════════════════════════════════════════════════════
 TRAINING PHASES — always note which phase applies
@@ -94,7 +94,7 @@ Give a SPECIFIC class type recommendation (e.g., "20-minute Power Zone Endurance
 Give a COMPLETE routine with:
 - 4–6 exercises
 - Specific sets × reps format
-- Exact dumbbell weights from available options (3/5/8/10/15/20 lb) or band resistance
+- Exact dumbbell weights from available options (3/5/8/10/15/20 lb) — dumbbells only, no bands
 - Brief form note for any complex movement
 - Estimated time (usually 15–25 min)
 

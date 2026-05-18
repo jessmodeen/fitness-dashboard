@@ -4,23 +4,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:         #0d1117;
-  --surface:    #161b22;
-  --surface-2:  #21262d;
-  --border:     #30363d;
-  --text:       #e6edf3;
-  --text-dim:   #8b949e;
-  --text-muted: #484f58;
+  --bg:         #f0f2f5;
+  --surface:    #ffffff;
+  --surface-2:  #f6f8fa;
+  --border:     #d0d7de;
+  --text:       #1a1f2e;
+  --text-dim:   #57606a;
+  --text-muted: #8c959f;
 
-  --green:      #3fb950;
-  --green-dim:  #0d4a1a;
-  --yellow:     #d29922;
-  --yellow-dim: #4d3800;
-  --red:        #f85149;
-  --red-dim:    #4d1010;
-  --blue:       #58a6ff;
-  --purple:     #bc8cff;
-  --orange:     #f0883e;
+  --green:      #1a7f37;
+  --green-dim:  #dafbe1;
+  --yellow:     #9a6700;
+  --yellow-dim: #fff8c5;
+  --red:        #cf222e;
+  --red-dim:    #ffebe9;
+  --blue:       #0969da;
+  --purple:     #8250df;
+  --orange:     #bc4c00;
 
   --radius:     10px;
   --gap:        16px;
@@ -67,10 +67,10 @@ code {
 }
 .btn:hover { opacity: 0.85; }
 
-.btn-primary  { background: var(--blue);  color: #000; }
-.btn-success  { background: var(--green); color: #000; }
+.btn-primary  { background: var(--blue);  color: #fff; }
+.btn-success  { background: var(--green); color: #fff; }
 .btn-danger   { background: var(--red);   color: #fff; }
-.btn-ghost    { background: transparent; border-color: var(--border); color: var(--text); }
+.btn-ghost    { background: #fff; border-color: var(--border); color: var(--text); }
 .btn-sm       { padding: 4px 10px; font-size: 12px; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -129,10 +129,10 @@ code {
 /* Error banner */
 .error-banner {
   background: var(--red-dim);
-  border: 1px solid var(--red);
+  border: 1px solid #ffc1c0;
   border-radius: var(--radius);
   padding: 10px 14px;
-  color: var(--text);
+  color: var(--red);
   font-size: 13px;
 }
 .error-banner p + p { margin-top: 4px; }
@@ -151,6 +151,9 @@ code {
    Recovery Card
 ───────────────────────────────────────────────────────────────────────────── */
 .card-recovery { display: flex; flex-direction: column; }
+.card-recovery.green  { border-top: 4px solid var(--green); }
+.card-recovery.yellow { border-top: 4px solid var(--yellow); }
+.card-recovery.red    { border-top: 4px solid var(--red); }
 
 .recovery-score {
   font-size: 72px;
@@ -158,9 +161,9 @@ code {
   line-height: 1;
   margin-bottom: 4px;
 }
-.recovery-score.green { color: var(--green); }
+.recovery-score.green  { color: var(--green); }
 .recovery-score.yellow { color: var(--yellow); }
-.recovery-score.red { color: var(--red); }
+.recovery-score.red    { color: var(--red); }
 .recovery-score.unknown { color: var(--text-muted); }
 
 .recovery-label {
@@ -271,14 +274,14 @@ code {
 /* Markdown output from Claude */
 .rec-content { line-height: 1.75; }
 .rec-content h1 { font-size: 20px; margin: 18px 0 8px; color: var(--text); }
-.rec-content h2 { font-size: 17px; margin: 20px 0 8px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.rec-content h2 { font-size: 17px; margin: 20px 0 8px; color: var(--text); border-bottom: 2px solid var(--border); padding-bottom: 6px; }
 .rec-content h3 { font-size: 14px; margin: 14px 0 6px; color: var(--blue); }
 .rec-content p  { margin-bottom: 10px; color: var(--text); }
 .rec-content ul, .rec-content ol { padding-left: 22px; margin-bottom: 10px; }
 .rec-content li { margin-bottom: 4px; color: var(--text); }
-.rec-content strong { color: var(--text); font-weight: 600; }
+.rec-content strong { color: var(--text); font-weight: 700; }
 .rec-content em { color: var(--text-dim); }
-.rec-content code { font-family: var(--font-mono); font-size: 0.85em; }
+.rec-content code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface-2); border: 1px solid var(--border); }
 .rec-content blockquote {
   border-left: 3px solid var(--purple);
   padding: 6px 14px;

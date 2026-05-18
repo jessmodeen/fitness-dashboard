@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Morning Dashboard — {{ now.strftime('%a %b %-d') }}{% endblock %}
+{% block title %}Morning Dashboard — {{ now.strftime('%a %b %d') }}{% endblock %}
 
 {% block body %}
 
@@ -45,7 +45,7 @@
   <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <header class="dash-header">
     <div class="dash-header-left">
-      <span class="dash-date">{{ now.strftime('%A, %B %-d, %Y') }}</span>
+      <span class="dash-date">{{ now.strftime('%A, %B %d, %Y') }}</span>
       <span class="dash-phase">Phase 1 — Indoor / Sub-Threshold</span>
     </div>
     <div class="dash-header-right">
