@@ -163,12 +163,15 @@ def generate_plan(whoop_data):
     from claude_client import PERSONAL_CONTEXT
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     today = datetime.now().strftime("%A, %B %d, %Y")
+    notes = os.environ.get("USER_NOTES", "").strip()
+    notes_section = f"\nMY PERSONAL NOTES & FEEDBACK:\n{notes}\n" if notes else ""
+
     user_msg = f"""Today is {today}.
 
 {format_whoop_summary(whoop_data)}
-
+{notes_section}
 Please generate my complete daily training plan for today."""
-
+    
     response = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=2500,
