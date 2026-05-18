@@ -260,10 +260,10 @@ def generate_pdf(plan_text, date_str, whoop_data):
 
     pdf.set_font("Helvetica", "B", 18)
     pdf.set_text_color(30, 30, 30)
-    pdf.cell(0, 10, "Daily Training Plan", ln=True)
+    pdf.cell(0, 10, "Daily Training Plan", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 11)
     pdf.set_text_color(90, 90, 90)
-    pdf.cell(0, 6, date_str, ln=True)
+    pdf.cell(0, 6, date_str, new_x="LMARGIN", new_y="NEXT")
     pdf.ln(4)
 
     recovery = whoop_data.get("recovery")
@@ -281,10 +281,10 @@ def generate_pdf(plan_text, date_str, whoop_data):
         pdf.rect(20, y, 170, 18, "DF")
         pdf.set_font("Helvetica", "B", 12)
         pdf.set_text_color(*color)
-        pdf.cell(0, 7, f"  Recovery: {score}% -- {label}", ln=True)
+        pdf.cell(0, 7, f"  Recovery: {score}% -- {label}", new_x="LMARGIN", new_y="NEXT")
         pdf.set_font("Helvetica", "", 10)
         pdf.set_text_color(90, 90, 90)
-        pdf.cell(0, 6, f"  HRV: {hrv} ms  |  Resting HR: {rhr} bpm", ln=True)
+        pdf.cell(0, 6, f"  HRV: {hrv} ms  |  Resting HR: {rhr} bpm", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(6)
 
     pdf.set_text_color(30, 30, 30)
@@ -294,7 +294,7 @@ def generate_pdf(plan_text, date_str, whoop_data):
             pdf.ln(4)
             pdf.set_font("Helvetica", "B", 13)
             pdf.set_text_color(9, 105, 218)
-            pdf.cell(0, 8, line[3:].strip(), ln=True)
+            pdf.cell(0, 8, line[3:].strip(), new_x="LMARGIN", new_y="NEXT")
             pdf.set_draw_color(208, 215, 222)
             pdf.line(20, pdf.get_y(), 190, pdf.get_y())
             pdf.ln(2)
@@ -302,7 +302,7 @@ def generate_pdf(plan_text, date_str, whoop_data):
         elif line.startswith("### "):
             pdf.set_font("Helvetica", "B", 11)
             pdf.set_text_color(60, 60, 60)
-            pdf.cell(0, 7, line[4:].strip(), ln=True)
+            pdf.cell(0, 7, line[4:].strip(), new_x="LMARGIN", new_y="NEXT")
             pdf.set_text_color(30, 30, 30)
         elif re.match(r'^[-*] ', line):
             item = re.sub(r'\*\*(.+?)\*\*', r'\1', line[2:]).strip()
