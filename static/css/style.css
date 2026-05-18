@@ -293,6 +293,31 @@ code {
 .rec-content hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   Notes Card
+───────────────────────────────────────────────────────────────────────────── */
+.card-notes { display: flex; flex-direction: column; gap: 10px; }
+
+.notes-hint { font-size: 12px; color: var(--text-dim); margin: 0; }
+
+.notes-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface-2);
+  resize: vertical;
+  line-height: 1.5;
+}
+.notes-textarea:focus { outline: none; border-color: var(--blue); background: var(--surface); }
+
+.notes-footer { display: flex; justify-content: space-between; align-items: center; }
+.notes-status { font-size: 12px; color: var(--green); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
    Setup Page
 ───────────────────────────────────────────────────────────────────────────── */
 .setup-page {
