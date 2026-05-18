@@ -307,11 +307,11 @@ def generate_pdf(plan_text, date_str, whoop_data):
         elif re.match(r'^[-*] ', line):
             item = re.sub(r'\*\*(.+?)\*\*', r'\1', line[2:]).strip()
             pdf.set_font("Helvetica", "", 10)
-            pdf.multi_cell(0, 6, f"  - {item}")
+            pdf.multi_cell(170, 6, f"  - {item}")
         elif line.strip():
             text = re.sub(r'\*\*(.+?)\*\*', r'\1', line).strip()
             pdf.set_font("Helvetica", "", 10)
-            pdf.multi_cell(0, 6, text)
+            pdf.multi_cell(170, 6, text)
         else:
             pdf.ln(3)
 
