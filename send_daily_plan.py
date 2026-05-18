@@ -290,27 +290,31 @@ def generate_pdf(plan_text, date_str, whoop_data):
     pdf.set_text_color(30, 30, 30)
     for line in _strip_emoji(plan_text).split("\n"):
         line = line.rstrip()
-        if line.startswith("## "):
-            pdf.ln(4)
-            pdf.set_font("Helvetica", "B", 13)
-            pdf.set_text_color(9, 105, 218)
-            pdf.cell(0, 8, line[3:].strip(), ln=True)
-            pdf.set_draw_color(208, 215, 222)
-            pdf.line(20, pdf.get_y(), 190, pdf.get_y())
-            pdf.ln(2)
-            pdf.set_text_color(30, 30, 30)
-        elif line.startswith("### "):
-            pdf.set_font("Helvetica", "B", 11)
-            pdf.set_text_color(60, 60, 60)
-            pdf.cell(0, 7, line[4:].strip(), ln=True)
-            pdf.set_text_color(30, 30, 30)
-                elif re.match(r'^[-*] ', line):
-            item = re.sub(r'\*\*(.+?)\*\*', r'\1', line[2:]).strip()
-            pdf.set_font("Helvetica", "", 10)
-            pdf.multi_cell(0, 6, f"  - {item}")
-        else:
-            pdf.ln(3)
-
+    if line.startswith("## "):
+        pdf.ln(4)
+        pdf.set_font("Helvetica", "B", 13)
+        pdf.set_text_color(9, 105, 218)
+        pdf.cell(0, 8, line[3:].strip(), ln=True)
+        pdf.set_draw_color(208, 215, 222)
+        pdf.line(20, pdf.get_y(), 190, pdf.get_y())
+        pdf.ln(2)
+        pdf.set_text_color(30, 30, 30)
+     elif line.startswith("### "):
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_text_color(60, 60, 60)
+        pdf.cell(0, 7, line[4:].strip(), ln=True)
+        pdf.set_text_color(30, 30, 30)
+     elif re.match(r'^[-*] ', line):
+        item = re.sub(r'\*\*(.+?)\*\*', r'\1', line[2:]).strip()
+        pdf.set_font("Helvetica", "", 10)
+        pdf.multi_cell(0, 6, f"  - {item}")
+     elif line.strip():
+        text = re.sub(r'\*\*(.+?)\*\*', r'\1', line).strip()
+        pdf.set_font("Helvetica", "", 10)
+        pdf.multi_cell(0, 6, text)
+     else:
+        pdf.ln(3)
+            
     return bytes(pdf.output())
 
 
